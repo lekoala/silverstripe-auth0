@@ -1,0 +1,11 @@
+---
+Name: auth0
+After:
+  - 'framework/*'
+---
+Security:
+  extensions:
+    - Auth0SecurityExtension
+Injector:
+  MemberLoginForm:
+    class: Auth0LoginForm

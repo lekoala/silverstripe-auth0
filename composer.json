@@ -1,0 +1,28 @@
+{
+    "name": "lekoala/silverstripe-auth0",
+    "description": "Auth0 integration for any SilverStripe site",
+    "type": "silverstripe-module",
+    "keywords": [
+        "silverstripe",
+        "module",
+        "auth0"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "LeKoala",
+            "email": "thomas@lekoala.be"
+        }
+    ],
+    "require": {
+        "php": ">=5.6",
+        "silverstripe/framework": "~3.5",
+        "auth0/auth0-php": "4.0.12"
+    },
+    "extra": {
+        "installer-name": "auth0"
+    },
+    "support": {
+        "issues": "https://github.com/lekoala/silverstripe-auth0/issues"
+    }
+}
