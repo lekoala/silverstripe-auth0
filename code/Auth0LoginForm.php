@@ -29,7 +29,7 @@ class Auth0LoginForm extends MemberLoginForm
                 $i++;
                 $service = str_replace('-oauth2', '', $connection);
                 $label = ucwords($service);
-                $holder->push(new LiteralField('Auth0' . $i, '<button class="auth0-popup ' . $connection . '" data-connection="' . $connection . '">' . $label . '</button>'));
+                $holder->push(new LiteralField('Auth0' . $i, '<button type="button" class="auth0-popup ' . $connection . '" data-connection="' . $connection . '">' . $label . '</button>'));
             }
 
             $holder->push(new LiteralField('Auth0Clearfix', '<div class="auth0-clear"></div>'));
