@@ -38,7 +38,7 @@ class Auth0LoginForm extends MemberLoginForm
 
     protected function logInUserAndRedirect($data)
     {
-        Session::clear('RegisterForm.Data')
+        Session::clear('RegisterForm.Data');
         return parent::logInUserAndRedirect($data);
     }
 
