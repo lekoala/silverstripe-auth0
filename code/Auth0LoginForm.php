@@ -36,6 +36,12 @@ class Auth0LoginForm extends MemberLoginForm
         }
     }
 
+    protected function logInUserAndRedirect($data)
+    {
+        Session::clear('RegisterForm.Data')
+        return parent::logInUserAndRedirect($data);
+    }
+
     protected function Auth0JsRequirements()
     {
         $data = Auth0SiteConfigExtension::getAuth0Data();
