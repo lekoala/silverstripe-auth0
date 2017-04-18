@@ -26,19 +26,6 @@ class Auth0SecurityExtension extends Extension
             return $this->closePopupScript();
         }
 
-        if (empty($user['email'])) {
-            return $this->closePopupScript();
-        }
-
-        $email = $user['email'];
-
-        $member = Member::get()->filter('Email', $email)->first();
-        if ($member) {
-            // If the member exist, do not overwrite their data
-            $member->logIn();
-            return $this->closePopupScript();
-        }
-
         //@link https://auth0.com/docs/user-profile
         $email_verified = isset($user['email_verified']) ? $user['email_verified'] : null;
         $name = isset($user['name']) ? $user['name'] : null;
@@ -48,6 +35,28 @@ class Auth0SecurityExtension extends Extension
         $gender = isset($user['gender']) ? $user['gender'] : null;
         $locale = isset($user['locale']) ? $user['locale'] : null;
         $nickname = isset($user['nickname']) ? $user['nickname'] : null;
+
+        // Email may not be shared
+        if (empty($user['email'])) {
+            Session::set('RegisterForm.Data', [
+                'FirstName' => $given_name,
+                'Surname' => $family_name,
+            ]);
+            return $this->closePopupScript();
+        }
+
+        $email = $user['email'];
+
+        /* @var $member Member */
+        $member = Member::get()->filter('Email', $email)->first();
+        if ($member) {
+            // If the member exist, do not overwrite their data unless specified
+            if ($member->hasMethod('updateAuth0')) {
+                $member->updateAuth0($user);
+            }
+            $member->logIn();
+            return $this->closePopupScript();
+        }
 
         $member = Member::create();
         $member->Email = $email;
@@ -72,7 +81,6 @@ class Auth0SecurityExtension extends Extension
             $member->fillAuth0($user);
         }
         $member->write();
-
         $member->logIn();
 
         return $this->closePopupScript();
