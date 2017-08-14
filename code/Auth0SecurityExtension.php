@@ -27,6 +27,7 @@ class Auth0SecurityExtension extends Extension
         }
 
         //@link https://auth0.com/docs/user-profile
+        $email = isset($user['email']) ? $user['email'] : null;
         $email_verified = isset($user['email_verified']) ? $user['email_verified'] : null;
         $name = isset($user['name']) ? $user['name'] : null;
         $given_name = isset($user['given_name']) ? $user['given_name'] : null;
@@ -38,20 +39,35 @@ class Auth0SecurityExtension extends Extension
         if (!$avatar) {
             $avatar = isset($user['picture']) ? $user['picture'] : null;
         }
+        $socialId = isset($user['third_party_id']) ? $user['third_party_id'] : null;
 
-        // Email may not be shared
-        if (empty($user['email'])) {
+        $filters = [];
+        if ($email) {
+            $filters['Email'] = $email;
+        }
+        if ($socialId) {
+            $filters['SocialId'] = $socialId;
+        }
+
+        if (empty($filters)) {
+            return $this->closePopupScript();
+        }
+
+        /* @var $member Member */
+        $member = Member::get()->filterAny($filters)->first();
+
+        // Email may not be shared and we need it to create a member. Store data for a prefilled register form
+        if (!$email && !$member) {
             Session::set('RegisterForm.Data', [
+                'FromAuth0' => true,
+                'SocialId' => $socialId,
                 'FirstName' => $given_name,
                 'Surname' => $family_name,
+                'UserData' => $user,
             ]);
             return $this->closePopupScript();
         }
 
-        $email = $user['email'];
-
-        /* @var $member Member */
-        $member = Member::get()->filter('Email', $email)->first();
         if ($member) {
             // If the member exist, do not overwrite their data unless specified
             if ($member->hasMethod('updateAuth0')) {
