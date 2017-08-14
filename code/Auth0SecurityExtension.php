@@ -31,10 +31,13 @@ class Auth0SecurityExtension extends Extension
         $name = isset($user['name']) ? $user['name'] : null;
         $given_name = isset($user['given_name']) ? $user['given_name'] : null;
         $family_name = isset($user['family_name']) ? $user['family_name'] : null;
-        $picture = isset($user['picture']) ? $user['picture'] : null;
         $gender = isset($user['gender']) ? $user['gender'] : null;
         $locale = isset($user['locale']) ? $user['locale'] : null;
         $nickname = isset($user['nickname']) ? $user['nickname'] : null;
+        $avatar = isset($user['picture_large']) ? $user['picture_large'] : null;
+        if (!$avatar) {
+            $avatar = isset($user['picture']) ? $user['picture'] : null;
+        }
 
         // Email may not be shared
         if (empty($user['email'])) {
@@ -81,9 +84,46 @@ class Auth0SecurityExtension extends Extension
             $member->fillAuth0($user);
         }
         $member->write();
+
+        // Store image
+        if ($member->hasField('AvatarID')) {
+            $image = self::storeRemoteImage(@file_get_contents($avatar), 'Avatar' . $member->ID, 'Avatars');
+            if ($image) {
+                $member->AvatarID = $image->ID;
+                $member->write();
+            }
+        }
+
         $member->logIn();
 
         return $this->closePopupScript();
+    }
+
+    /**
+     * Store an image
+     *
+     * @param string $data
+     * @param string $name
+     * @param string $folder
+     * @return Image
+     */
+    public static function storeRemoteImage($data, $name, $folder)
+    {
+        if (!$data) {
+            return;
+        }
+
+        $filter = new FileNameFilter;
+        $name = $filter->filter($name);
+
+        $folderName = self::$folder . '/' . $folder;
+        $folderPath = BASE_PATH . '/assets/' . $folderName;
+        $filename = $folderPath . '/' . $name;
+        $folderInst = Folder::find_or_make($folderName);
+        file_put_contents($filename, $data);
+        $folderInst->syncChildren();
+
+        return Image::find($folderName . '/' . $name);
     }
 
     protected function closePopupScript()
