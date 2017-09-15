@@ -16,8 +16,8 @@
     ],
     "require": {
         "php": ">=5.6",
-        "silverstripe/framework": "~3.5",
-        "auth0/auth0-php": "4.0.12"
+        "silverstripe/framework": "~3.6",
+        "auth0/auth0-php": "^5.0"
     },
     "extra": {
         "installer-name": "auth0"
