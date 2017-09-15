@@ -13,6 +13,7 @@ class Auth0SiteConfigExtension extends DataExtension
         'Auth0ClientId' => "Varchar(191)",
         'Auth0ClientSecret' => "Varchar(191)",
         'Auth0Connections' => "Varchar(191)",
+        'Auth0Audience' => "Varchar(191)",
     );
 
     public function updateCMSFields(\FieldList $fields)
@@ -20,6 +21,8 @@ class Auth0SiteConfigExtension extends DataExtension
         $fields->addFieldToTab('Root.Auth0', new TextField('Auth0Domain', 'Domain'));
         $fields->addFieldToTab('Root.Auth0', new TextField('Auth0ClientId', 'Client Id'));
         $fields->addFieldToTab('Root.Auth0', new TextField('Auth0ClientSecret', 'Client Secret'));
+        $fields->addFieldToTab('Root.Auth0', $Auth0Audience = new TextField('Auth0Audience', 'Audience'));
+        $Auth0Audience - setAttribute('placeholder', 'https://domain/userinfo');
         $fields->addFieldToTab('Root.Auth0', $Auth0Connections = new TextField('Auth0Connections', 'Connections'));
         $Auth0Connections->setAttribute('placeholder', 'google-oauth2,facebook,...');
         $Auth0Connections->setDescription("Comma separated list of available connections");
@@ -56,11 +59,17 @@ class Auth0SiteConfigExtension extends DataExtension
         } else {
             $connections = $sc->Auth0Connections;
         }
+        if (defined('AUTH0_AUDIENCE')) {
+            $audience = AUTH0_AUDIENCE;
+        } else {
+            $audience = $sc->Auth0Audience;
+        }
 
         return [
             'domain' => $domain,
             'client_id' => $client_id,
             'client_secret' => $client_secret,
+            'audience' => $audience,
             'redirect_uri' => Auth0SecurityExtension::Auth0CallbackUrl(),
             'connections' => $connections,
             'debug' => Director::isDev() ? true : false,
