@@ -29,8 +29,6 @@ class Auth0SecurityExtension extends Extension
             return $this->closePopupScript();
         }
 
-        d($user);
-
         //@link https://auth0.com/docs/user-profile
         $email = isset($user['email']) ? $user['email'] : null;
         $email_verified = isset($user['email_verified']) ? $user['email_verified'] : null;
