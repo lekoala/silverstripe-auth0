@@ -22,7 +22,7 @@ class Auth0SiteConfigExtension extends DataExtension
         $fields->addFieldToTab('Root.Auth0', new TextField('Auth0ClientId', 'Client Id'));
         $fields->addFieldToTab('Root.Auth0', new TextField('Auth0ClientSecret', 'Client Secret'));
         $fields->addFieldToTab('Root.Auth0', $Auth0Audience = new TextField('Auth0Audience', 'Audience'));
-        $Auth0Audience - setAttribute('placeholder', 'https://domain/userinfo');
+        $Auth0Audience->setAttribute('placeholder', 'https://domain/userinfo');
         $fields->addFieldToTab('Root.Auth0', $Auth0Connections = new TextField('Auth0Connections', 'Connections'));
         $Auth0Connections->setAttribute('placeholder', 'google-oauth2,facebook,...');
         $Auth0Connections->setDescription("Comma separated list of available connections");
