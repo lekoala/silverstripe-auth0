@@ -23,13 +23,20 @@ class Auth0SecurityExtension extends Extension
 
         $client = $this->getClient();
 
-        $user = $client->getUser();
+        try {
+            $user = $client->getUser();
+        } catch (Exception $ex) {
+            $user = null;
+            SS_Log::log($ex, SS_Log::WARN);
+        }
+
         if (!$user) {
             $this->owner->extend('onAuth0Failed', $user);
             return $this->closePopupScript();
         }
-
-        //@link https://auth0.com/docs/user-profile
+        // Warning : OIDC Conformant flag will return an empty profile by default
+        //
+        // @link https://auth0.com/docs/user-profile
         $email = isset($user['email']) ? $user['email'] : null;
         $email_verified = isset($user['email_verified']) ? $user['email_verified'] : null;
         $name = isset($user['name']) ? $user['name'] : null;
