@@ -1,5 +1,7 @@
 <?php
 
+use Auth0\SDK\Auth0;
+
 /**
  * Auth0SecurityExtension
  *
@@ -21,12 +23,20 @@ class Auth0SecurityExtension extends Extension
 
         $client = $this->getClient();
 
-        $user = $client->getUser();
-        if (!$user) {
-            return $this->closePopupScript();
+        try {
+            $user = $client->getUser();
+        } catch (Exception $ex) {
+            $user = null;
+            SS_Log::log($ex, SS_Log::WARN);
         }
 
-        //@link https://auth0.com/docs/user-profile
+        if (!$user) {
+            $this->owner->extend('onAuth0Failed', $user);
+            return $this->closePopupScript();
+        }
+        // Warning : OIDC Conformant flag will return an empty profile by default
+        //
+        // @link https://auth0.com/docs/user-profile
         $email = isset($user['email']) ? $user['email'] : null;
         $email_verified = isset($user['email_verified']) ? $user['email_verified'] : null;
         $name = isset($user['name']) ? $user['name'] : null;
@@ -49,7 +59,10 @@ class Auth0SecurityExtension extends Extension
             $filters['SocialId'] = $socialId;
         }
 
+
         if (empty($filters)) {
+            SS_Log::log("No filters for user " . json_encode($user), SS_Log::DEBUG);
+            $this->owner->extend('onAuth0Failed', $user);
             return $this->closePopupScript();
         }
 
@@ -178,23 +191,39 @@ class Auth0SecurityExtension extends Extension
             return;
         }
 
+        // @link http://docs.guzzlephp.org/en/stable/request-options.html
         $guzzleOpts = [];
 
         if (strlen(ini_get('curl.cainfo')) === 0) {
-            $guzzleOpts['cert'] = \Composer\CaBundle\CaBundle::getBundledCaBundlePath();
-            $guzzleOpts['default'] = ['verify' => false];
+            // Set to a string to specify the path to a file containing a PEM formatted client side certificate. 
+//            $guzzleOpts['cert'] = \Composer\CaBundle\CaBundle::getBundledCaBundlePath();
+            $guzzleOpts['verify'] = false;
         }
 
-        $auth0 = new Auth0\SDK\API\Oauth2Client([
+        $params = [
             'domain' => $data['domain'],
             'client_id' => $data['client_id'],
             'client_secret' => $data['client_secret'],
             'redirect_uri' => $data['redirect_uri'],
             'debug' => $data['debug'],
+            'store' => false,
+//            'persist_id_token' => true,
+//            'persist_access_token' => true,
+//            'persist_refresh_token' => true,
             'guzzle_options' => $guzzleOpts,
-        ]);
+        ];
 
-        $auth0 = new Auth0\SDK\API\Oauth2Client($data);
+        if (isset($data['audience'])) {
+            $params['audience'] = $data['audience'];
+        }
+
+        $auth0 = new Auth0($params);
+
+        if (!empty($data['debug'])) {
+            $auth0->setDebugger(function($message) {
+                SS_Log::log($message, SS_Log::DEBUG);
+            });
+        }
 
         return $auth0;
     }
