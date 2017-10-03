@@ -55,23 +55,43 @@ class Auth0LoginForm extends MemberLoginForm
         $auth0_callback = $data['redirect_uri'];
 
         // Please include jQuery in the init method of your controller
-        Requirements::javascript("https://cdn.auth0.com/w2/auth0-7.6.1.min.js");
+//        Requirements::javascript("https://cdn.auth0.com/w2/auth0-7.6.1.min.js");
+//        Requirements::customScript(<<<JS
+//var auth0 = new Auth0({
+//  domain:         '$auth0_domain',
+//  clientID:       '$auth0_client_id',
+//  callbackURL:    '$auth0_callback',
+//  responseType: 'token'
+//});
+//jQuery(function() {
+//  jQuery('.auth0-popup').on('click',function(e) {
+//       e.preventDefault();
+//       var opts = {
+//           popup: true,
+//           connection: jQuery(this).data('connection'),
+//           scope: 'openid profile'
+//       };
+//       auth0.login(opts, function(err, result) {
+//            if (err) {
+//              console.log("something went wrong: " + err.message);
+//              return;
+//            }
+//          });
+//  });
+//});
+//JS
+//        );
+        Requirements::javascript("https://cdn.auth0.com/w2/auth0-7.1.min.js");
         Requirements::customScript(<<<JS
 var auth0 = new Auth0({
   domain:         '$auth0_domain',
   clientID:       '$auth0_client_id',
-  callbackURL:    '$auth0_callback',
-  responseType: 'token'
+  callbackURL:    '$auth0_callback'
 });
 jQuery(function() {
   jQuery('.auth0-popup').on('click',function(e) {
        e.preventDefault();
-       var opts = {
-           popup: true,
-           connection: jQuery(this).data('connection'),
-           scope: 'openid profile'
-       };
-       auth0.login(opts, function(err, result) {
+       auth0.signin({popup: true, connection: jQuery(this).data('connection')}, function(err, result) {
             if (err) {
               console.log("something went wrong: " + err.message);
               return;
@@ -81,6 +101,7 @@ jQuery(function() {
 });
 JS
         );
+
 
         return true;
     }
