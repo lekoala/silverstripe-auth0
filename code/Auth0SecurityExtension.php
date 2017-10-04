@@ -50,11 +50,14 @@ class Auth0SecurityExtension extends Extension
         }
         $socialId = isset($user['third_party_id']) ? $user['third_party_id'] : null;
 
+        /* @var $singl Member */
+        $singl = singleton('Member');
+
         $filters = [];
         if ($email) {
             $filters['Email'] = $email;
         }
-        if ($socialId) {
+        if ($socialId && $singl->hasField('SocialId')) {
             $filters['SocialId'] = $socialId;
         }
 
