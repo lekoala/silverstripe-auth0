@@ -9,7 +9,6 @@ use Auth0\SDK\Auth0;
  */
 class Auth0SecurityExtension extends Extension
 {
-
     private static $allowed_actions = array(
         'auth0'
     );
@@ -145,7 +144,7 @@ class Auth0SecurityExtension extends Extension
         $filter = new FileNameFilter;
         $name = $filter->filter($name);
 
-        $folderName = self::$folder . '/' . $folder;
+        $folderName = $folder;
         $folderPath = BASE_PATH . '/assets/' . $folderName;
         $filename = $folderPath . '/' . $name;
         $folderInst = Folder::find_or_make($folderName);
